@@ -1,12 +1,11 @@
 from typing import List, Optional
 
 from fastapi import Query, Depends, FastAPI
-from fastapi.responses import JSONResponse
 from sqlalchemy import func
 
+from api_models import FilterResponse, AppResponse
 from database import SessionLocal, get_db
 from db_models import Category, App
-from api_models import FilterResponse, AppResponse
 
 app = FastAPI()
 
@@ -54,9 +53,9 @@ def get_filtered_apps(
 ):
     query = db.query(App)
     if category:
-        category_id = db.query(Category.id).filter(Category.name == category).first()
+        category_id = get_category_id(db, category) if category else None
         if category_id:
-            query = query.filter(App.category_id == category_id[0])
+            query = query.filter(App.category_id == category_id)
     if min_rating is not None:
         query = query.filter(App.rating >= min_rating)
     if max_rating is not None:
@@ -84,31 +83,32 @@ def get_filtered_apps(
 
 
 @app.get("/apps/release_trend", response_model=List[dict])
-def get_app_release_trend(category_name: str | None = None, db: SessionLocal = Depends(get_db)):
-    if category_name:
-        category_id = db.query(Category.id).filter(Category.name == category_name).first()
-        if category_id:
-            result = db.query(func.extract('year', App.released).label('year'), func.count().label('count')) \
-                .filter(App.category_id == category_id[0]) \
-                .group_by(func.extract('year', App.released)) \
-                .order_by('year').all()
-            return [{"year": int(year), "count": count} for year, count in result]
-        return JSONResponse(content={"message": "Category not found."}, status_code=404)
+def get_app_release_trend(category_name: Optional[str] = None, db: SessionLocal = Depends(get_db)):
+    category_id = get_category_id(db, category_name) if category_name else None
 
-    result = db.query(func.extract('year', App.released).label('year'), func.count().label('count')) \
+    query = db.query(func.extract('year', App.released).label('year'), func.count().label('count')) \
         .group_by(func.extract('year', App.released)) \
-        .order_by('year').all()
+        .order_by('year')
+
+    if category_id:
+        query = query.filter(App.category_id == category_id)
+
+    result = query.all()
     return [{"year": int(year), "count": count} for year, count in result]
 
 
 @app.get("/apps/average_rating/", response_model=dict)
-def get_average_rating(category_name: str | None = None, db: SessionLocal = Depends(get_db)):
-    if category_name:
-        category_id = db.query(Category.id).filter(Category.name == category_name).first()
-        if category_id:
-            avg_rating = db.query(func.avg(App.rating)).filter(App.category_id == category_id[0]).scalar()
-            return {"category": category_name, "average_rating": avg_rating}
-        return JSONResponse(content={"message": "Category not found."}, status_code=404)
+def get_average_rating(category_name: Optional[str] = None, db: SessionLocal = Depends(get_db)):
+    category_id = get_category_id(db, category_name) if category_name else None
+    query = db.query(func.avg(App.rating))
 
-    avg_rating = db.query(func.avg(App.rating)).scalar()
-    return {"category": "All", "average_rating": avg_rating}
+    if category_id:
+        query = query.filter(App.category_id == category_id)
+
+    avg_rating = query.scalar()
+    return {"category": category_name or "All", "average_rating": avg_rating}
+
+
+def get_category_id(db: SessionLocal, category_name: str) -> Optional[int]:
+    category_id = db.query(Category.id).filter(Category.name == category_name).first()
+    return category_id[0] if category_id else None
