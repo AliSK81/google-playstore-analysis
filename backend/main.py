@@ -171,27 +171,27 @@ def apply_filters_to_query(
 
     if category_id:
         query = query.filter(App.category_id == category_id)
-    if filters.get("min_rating") is not None:
+    if filters.get("min_rating"):
         query = query.filter(App.rating >= filters["min_rating"])
-    if filters.get("max_rating") is not None:
+    if filters.get("max_rating"):
         query = query.filter(App.rating <= filters["max_rating"])
-    if filters.get("min_price") is not None:
+    if filters.get("min_price"):
         query = query.filter(App.price >= filters["min_price"])
-    if filters.get("max_price") is not None:
+    if filters.get("max_price"):
         query = query.filter(App.price <= filters["max_price"])
-    if filters.get("min_installs") is not None:
+    if filters.get("min_installs"):
         query = query.filter(App.installs >= filters["min_installs"])
-    if filters.get("max_installs") is not None:
+    if filters.get("max_installs"):
         query = query.filter(App.installs <= filters["max_installs"])
     if filters.get("content_rating"):
         query = query.filter(App.content_rating == filters["content_rating"])
-    if filters.get("free") is not None:
+    if filters.get("free"):
         query = query.filter(App.free == filters["free"])
-    if filters.get("ad_supported") is not None:
+    if filters.get("ad_supported"):
         query = query.filter(App.ad_supported == filters["ad_supported"])
-    if filters.get("in_app_purchases") is not None:
+    if filters.get("in_app_purchases"):
         query = query.filter(App.in_app_purchases == filters["in_app_purchases"])
-    if filters.get("editors_choice") is not None:
+    if filters.get("editors_choice"):
         query = query.filter(App.editors_choice == filters["editors_choice"])
 
     return query
