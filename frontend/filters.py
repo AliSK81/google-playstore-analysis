@@ -74,6 +74,6 @@ def get_filters(show_category=False, show_rating=False, show_price=False, show_i
         filters["editors_choice"] = st.checkbox("🏆 Editors' Choice")
 
     if show_limits:
-        filters["limit"] = st.number_input("📝 Results Limit", min_value=1, max_value=5000, value=1000, step=100)
+        filters["limit"] = st.number_input("📝 Results Limit", min_value=1, max_value=3000000, value=1000, step=100)
 
     return filters
