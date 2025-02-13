@@ -129,6 +129,21 @@ def get_app_release_trend(category_name: Optional[str] = None, db: SessionLocal 
     return [{"year": int(year), "count": count} for year, count in result]
 
 
+@app.get("/apps/update_trend", response_model=List[dict])
+def get_app_update_trend(category_name: Optional[str] = None, db: SessionLocal = Depends(get_db)):
+    query = db.query(func.extract('year', App.last_updated).label('year'), func.count().label('count')) \
+        .group_by(func.extract('year', App.last_updated)) \
+        .order_by('year')
+
+    filters = {
+        "category": category_name
+    }
+    query = apply_filters_to_query(query, filters, db)
+
+    result = query.all()
+    return [{"year": int(year), "count": count} for year, count in result]
+
+
 @app.get("/apps/average_rating/", response_model=dict)
 def get_average_rating(category_name: Optional[str] = None, db: SessionLocal = Depends(get_db)):
     query = db.query(func.avg(App.rating))
