@@ -1,13 +1,7 @@
 import streamlit as st
 
+from data_fetcher import fetch_average_rating
 from filters import get_filters
-from utils import fetch_data
-
-
-def fetch_average_rating(category):
-    params = {"category_name": category} if category else {}
-    return fetch_data("apps/average_rating", params).get("average_rating")
-
 
 st.subheader("Average Rating per Category")
 

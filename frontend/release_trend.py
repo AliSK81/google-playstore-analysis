@@ -1,14 +1,8 @@
 import matplotlib.pyplot as plt
 import streamlit as st
 
+from data_fetcher import fetch_release_trend
 from filters import get_filters
-from utils import fetch_data
-
-
-def fetch_release_trend(category=None):
-    params = {"category_name": category} if category else {}
-    return fetch_data("apps/release_trend", params)
-
 
 st.subheader("App Release Trend")
 

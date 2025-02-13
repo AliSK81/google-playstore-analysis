@@ -1,15 +1,8 @@
 import matplotlib.pyplot as plt
-import pandas as pd
 import streamlit as st
 
+from data_fetcher import fetch_apps
 from filters import get_filters
-from utils import fetch_data
-
-
-def fetch_apps(filters):
-    data = fetch_data("apps", filters)
-    return pd.DataFrame(data) if data else pd.DataFrame()
-
 
 st.subheader("Rating Distribution")
 

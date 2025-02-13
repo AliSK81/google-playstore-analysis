@@ -1,11 +1,6 @@
 import streamlit as st
 
-from utils import fetch_data
-
-
-def fetch_filters():
-    filters_data = fetch_data("filters")
-    return filters_data if filters_data else {}
+from data_fetcher import fetch_filters
 
 
 def load_filters():
