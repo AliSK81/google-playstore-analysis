@@ -35,7 +35,7 @@ def fetch_release_trend(category=None):
 
 def fetch_update_trend(category=None):
     params = {"category_name": category} if category else {}
-    return fetch_data("apps/release_trend", params)
+    return fetch_data("apps/update_trend", params)
 
 
 def fetch_average_rating(category):
