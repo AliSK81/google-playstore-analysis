@@ -42,6 +42,17 @@ google-playstore-analysis/
 │   ├── indexes.sql         # Index optimization scripts
 │   └── schema.sql          # Database schema creation
 │
+│── docs/                   # Documentation files
+│   ├── demo_video.mp4      # Project demo video
+│   ├── report.docx         # Final project report
+│   └── report.pdf          # PDF version of the report
+│
+│── data/                   # Processed and raw data
+│   ├── cleaned_apps.csv    # Cleaned app data
+│   ├── cleaned_categories.csv # Cleaned category data
+│   ├── cleaned_developers.csv # Cleaned developer data
+│   └── Google-Playstore.csv  # Raw dataset
+│
 ├── .env                    # Environment variables for database connection
 └── README.md               # Setup and usage guide
 ```
