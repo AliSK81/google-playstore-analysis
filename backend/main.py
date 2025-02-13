@@ -213,34 +213,32 @@ def get_filtered_apps(
     return apps
 
 
-@app.get("/apps/free/social", response_model=List[AppResponse])
-def get_free_apps_in_social(db: SessionLocal = Depends(get_db)):
-    category_id = db.query(Category.id).filter(Category.name == "Social").first()
-    if category_id:
-        query = db.query(App).filter(App.category_id == category_id[0], App.free == True)
-        free_apps = query.all()
-        return free_apps
-    return JSONResponse(content={"message": "No such category found."}, status_code=404)
+@app.get("/apps/release_trend", response_model=List[dict])
+def get_app_release_trend(category_name: str | None = None, db: SessionLocal = Depends(get_db)):
+    if category_name:
+        category_id = db.query(Category.id).filter(Category.name == category_name).first()
+        if category_id:
+            result = db.query(func.extract('year', App.released).label('year'), func.count().label('count')) \
+                .filter(App.category_id == category_id[0]) \
+                .group_by(func.extract('year', App.released)) \
+                .order_by('year').all()
+            return [{"year": int(year), "count": count} for year, count in result]
+        return JSONResponse(content={"message": "Category not found."}, status_code=404)
+
+    result = db.query(func.extract('year', App.released).label('year'), func.count().label('count')) \
+        .group_by(func.extract('year', App.released)) \
+        .order_by('year').all()
+    return [{"year": int(year), "count": count} for year, count in result]
 
 
-@app.get("/apps/release_trend/{category_name}", response_model=List[dict])
-def get_app_release_trend(category_name: str, db: SessionLocal = Depends(get_db)):
-    category_id = db.query(Category.id).filter(Category.name == category_name).first()
-    if category_id:
-        apps = db.query(App).filter(App.category_id == category_id[0]).all()
-        yearly_count = {}
-        for app in apps:
-            year = app.released.year if app.released else None
-            if year:
-                yearly_count[year] = yearly_count.get(year, 0) + 1
-        return [{"year": year, "count": count} for year, count in sorted(yearly_count.items())]
-    return JSONResponse(content={"message": "Category not found."}, status_code=404)
+@app.get("/apps/average_rating/", response_model=dict)
+def get_average_rating(category_name: str | None = None, db: SessionLocal = Depends(get_db)):
+    if category_name:
+        category_id = db.query(Category.id).filter(Category.name == category_name).first()
+        if category_id:
+            avg_rating = db.query(func.avg(App.rating)).filter(App.category_id == category_id[0]).scalar()
+            return {"category": category_name, "average_rating": avg_rating}
+        return JSONResponse(content={"message": "Category not found."}, status_code=404)
 
-
-@app.get("/apps/average_rating/{category_name}", response_model=dict)
-def get_average_rating(category_name: str, db: SessionLocal = Depends(get_db)):
-    category_id = db.query(Category.id).filter(Category.name == category_name).first()
-    if category_id:
-        avg_rating = db.query(func.avg(App.rating)).filter(App.category_id == category_id[0]).scalar()
-        return {"category": category_name, "average_rating": avg_rating}
-    return JSONResponse(content={"message": "Category not found."}, status_code=404)
+    avg_rating = db.query(func.avg(App.rating)).scalar()
+    return {"category": "All", "average_rating": avg_rating}

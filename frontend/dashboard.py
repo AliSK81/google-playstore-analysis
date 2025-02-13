@@ -6,8 +6,6 @@ import streamlit as st
 api_url = "http://127.0.0.1:8000"
 
 filters_data = None
-release_trend = {}
-average_rating = {}
 
 
 def fetch_filters():
@@ -20,14 +18,16 @@ def fetch_apps(filters):
     return pd.DataFrame(response.json()) if response.status_code == 200 else pd.DataFrame()
 
 
-def fetch_release_trend(category):
-    response = requests.get(f"{api_url}/apps/release_trend/{category}")
+def fetch_release_trend(category: str | None = None):
+    params = {"category_name": category} if category else {}
+    response = requests.get(f"{api_url}/apps/release_trend", params=params)
     return response.json() if response.status_code == 200 else []
 
 
 def fetch_average_rating(category):
-    response = requests.get(f"{api_url}/apps/average_rating/{category}")
-    return response.json() if response.status_code == 200 else {}
+    params = {"category_name": category} if category else {}
+    response = requests.get(f"{api_url}/apps/average_rating/", params=params)
+    return response.json().get("average_rating") if response.status_code == 200 else None
 
 
 def configure_page():
@@ -125,7 +125,7 @@ def plot_rating_distribution(filters):
     if filtered_df.empty:
         st.warning("No data available for rating distribution.")
     else:
-        fig, ax = plt.subplots(figsize=(6, 4))
+        fig, ax = plt.subplots(figsize=(8, 3))
         filtered_df["rating"].hist(bins=20, ax=ax, color="blue", alpha=0.7)
         ax.set_xlabel("Rating")
         ax.set_ylabel("Count")
@@ -134,12 +134,11 @@ def plot_rating_distribution(filters):
 
 def plot_release_trend(category):
     st.subheader("📅 App Release Trend")
-    if category not in release_trend:
-        release_trend[category] = fetch_release_trend(category)
-    if release_trend[category]:
-        years = [entry["year"] for entry in release_trend[category]]
-        counts = [entry["count"] for entry in release_trend[category]]
-        fig, ax = plt.subplots(figsize=(6, 4))
+    release_trend = fetch_release_trend(category)
+    if release_trend:
+        years = [entry["year"] for entry in release_trend]
+        counts = [entry["count"] for entry in release_trend]
+        fig, ax = plt.subplots(figsize=(8, 3))
         ax.plot(years, counts, marker="o", color="green")
         ax.set_xlabel("Year")
         ax.set_ylabel("Number of Apps Released")
@@ -150,13 +149,9 @@ def plot_release_trend(category):
 
 def display_average_rating(category):
     st.subheader("📊 Average Rating per Category")
-    if category not in average_rating:
-        average_rating[category] = fetch_average_rating(category)
-    avg_rating = average_rating.get(category, {}).get("average_rating", None)
-    if avg_rating:
-        st.write(f"Average Rating for {category}: {avg_rating}")
-    else:
-        st.warning(f"No average rating data available for {category}.")
+    avg_rating = fetch_average_rating(category)
+    rounded_rating = round(avg_rating, 1)
+    st.markdown(f"### 🌟 **{rounded_rating}** / 5")
 
 
 def main():
