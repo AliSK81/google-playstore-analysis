@@ -5,8 +5,6 @@ import streamlit as st
 
 api_url = "http://127.0.0.1:8000"
 
-filters_data = None
-
 
 def fetch_filters():
     response = requests.get(f"{api_url}/filters")
@@ -36,12 +34,12 @@ def configure_page():
 
 
 def load_filters():
-    global filters_data
-    if filters_data is None:
-        filters_data = fetch_filters()
+    if "filters_data" not in st.session_state:
+        st.session_state.filters_data = fetch_filters()
 
 
 def get_filter_values():
+    filters_data = st.session_state.filters_data
     categories = filters_data.get("categories", [])
     content_ratings = filters_data.get("content_ratings", [])
     min_rating = filters_data.get("min_rating", 0.0)
@@ -158,7 +156,10 @@ def main():
     configure_page()
     load_filters()
 
-    categories, content_ratings, min_rating, max_rating, min_price, max_price, min_installs, max_installs = get_filter_values()
+    (categories, content_ratings,
+     min_rating, max_rating,
+     min_price, max_price,
+     min_installs, max_installs) = get_filter_values()
 
     tab = st.sidebar.radio("Choose a tab",
                            ["Filtered Apps", "Rating Distribution", "App Release Trend", "Average Rating per Category"])
