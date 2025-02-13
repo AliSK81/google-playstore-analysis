@@ -15,6 +15,6 @@ avg_rating = fetch_average_rating(category)
 
 if avg_rating is not None:
     rounded_rating = round(avg_rating, 1)
-    st.markdown(f"### 🌟 **{round(avg_rating, 1)}** out of 5")
+    st.markdown(f"# 🌟 **{round(avg_rating, 1)}** out of 5")
 else:
     st.warning("No average rating data available.")
