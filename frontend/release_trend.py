@@ -1,22 +1,23 @@
 import matplotlib.pyplot as plt
 import streamlit as st
 
-from filters import get_filter_values
+from filters import get_filters
 from utils import fetch_data
 
 
 def fetch_release_trend(category=None):
-    params = {"category_name": category} if category and category != 'All' else {}
+    params = {"category_name": category} if category else {}
     return fetch_data("apps/release_trend", params)
 
 
 st.subheader("App Release Trend")
 
-(categories, content_ratings, min_rating, max_rating, min_price, max_price, min_installs,
- max_installs) = get_filter_values()
-
 with st.sidebar:
-    category = st.selectbox("📂 Select Category", ["All"] + categories)
+    filters = get_filters(
+        show_category=True
+    )
+
+category = filters["category"]
 
 release_trend = fetch_release_trend(category)
 
