@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import streamlit as st
 
-from data_fetcher import fetch_apps
+from data_fetcher import fetch_rating_distribution
 from filters import get_filters
 
 st.subheader("Rating Distribution")
@@ -18,11 +18,14 @@ with st.sidebar:
         show_in_app=True,
         show_editors_choice=True)
 
-filtered_df = fetch_apps(filters)
+filtered_data = fetch_rating_distribution(filters)
 
-if not filtered_df.empty:
-    fig, ax = plt.subplots(figsize=(8, 3))
-    filtered_df["rating"].hist(bins=20, ax=ax, color="blue", alpha=0.7)
+if filtered_data:
+    ratings = [entry['rating'] for entry in filtered_data]
+    counts = [entry['count'] for entry in filtered_data]
+
+    fig, ax = plt.subplots(figsize=(5, 3))
+    ax.bar(ratings, counts, color="blue", alpha=0.9, width=0.09)
     ax.set_xlabel("Rating")
     ax.set_ylabel("Count")
     st.pyplot(fig)

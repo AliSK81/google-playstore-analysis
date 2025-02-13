@@ -23,6 +23,11 @@ def fetch_apps(filters):
     return pd.DataFrame(data) if data else pd.DataFrame()
 
 
+def fetch_rating_distribution(filters):
+    data = fetch_data("apps/rating_distribution", filters)
+    return data if data else []
+
+
 def fetch_release_trend(category=None):
     params = {"category_name": category} if category else {}
     return fetch_data("apps/release_trend", params)
