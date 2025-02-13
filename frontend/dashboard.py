@@ -54,41 +54,37 @@ def get_filter_values():
 def get_filter_input(tab, categories, content_ratings, min_rating, max_rating, min_price, max_price, min_installs,
                      max_installs):
     with st.sidebar:
-        category = content_rating = None
+        content_rating = None
         free_only = has_ads = has_in_app_purchases = editors_choice = False
         limit = 1000
 
+        category = st.selectbox("📂 Select Category", ["All"] + categories)
+
+        if tab in ["Filtered Apps", "Rating Distribution"]:
+            min_rating, max_rating = st.slider(
+                "⭐ Rating Range",
+                min_value=min_rating,
+                max_value=max_rating,
+                value=(min_rating, max_rating),
+                step=0.1
+            )
+            min_price, max_price = st.slider(
+                "💰 Price Range ($)",
+                min_value=min_price,
+                max_value=max_price,
+                value=(min_price, max_price),
+                step=0.1
+            )
+            min_installs = st.number_input("📥 Minimum Installs", min_value=min_installs, value=min_installs, step=100)
+            max_installs = st.number_input("📥 Maximum Installs", min_value=min_installs, value=max_installs, step=100)
+            content_rating = st.selectbox("🔞 Content Rating", ["All"] + content_ratings)
+            free_only = st.checkbox("🆓 Show Only Free Apps")
+            has_ads = st.checkbox("📢 Apps with Ads")
+            has_in_app_purchases = st.checkbox("💵 Apps with In-App Purchases")
+            editors_choice = st.checkbox("🏆 Editors' Choice")
+
         if tab == "Filtered Apps":
-            category = st.selectbox("📂 Select Category", ["All"] + categories)
-            min_rating = st.slider("⭐ Minimum Rating", min_rating, max_rating, min_rating)
-            max_rating = st.slider("⭐ Maximum Rating", min_rating, max_rating, max_rating)
-            min_price = st.number_input("💰 Minimum Price ($)", min_value=min_price, value=min_price, step=1.0)
-            max_price = st.number_input("💰 Maximum Price ($)", min_value=min_price, value=max_price, step=1.0)
-            min_installs = st.number_input("📥 Minimum Installs", min_value=min_installs, value=min_installs, step=100)
-            max_installs = st.number_input("📥 Maximum Installs", min_value=min_installs, value=max_installs, step=100)
-            content_rating = st.selectbox("🔞 Content Rating", ["All"] + content_ratings)
-            free_only = st.checkbox("🆓 Show Only Free Apps")
-            has_ads = st.checkbox("📢 Apps with Ads")
-            has_in_app_purchases = st.checkbox("💵 Apps with In-App Purchases")
-            editors_choice = st.checkbox("🏆 Editors' Choice")
             limit = st.number_input("📝 Results Limit", min_value=1, max_value=5000, value=1000, step=100)
-        elif tab == "Rating Distribution":
-            category = st.selectbox("📂 Select Category", ["All"] + categories)
-            min_rating = st.slider("⭐ Minimum Rating", min_rating, max_rating, min_rating)
-            max_rating = st.slider("⭐ Maximum Rating", min_rating, max_rating, max_rating)
-            min_price = st.number_input("💰 Minimum Price ($)", min_value=min_price, value=min_price, step=1.0)
-            max_price = st.number_input("💰 Maximum Price ($)", min_value=min_price, value=max_price, step=1.0)
-            min_installs = st.number_input("📥 Minimum Installs", min_value=min_installs, value=min_installs, step=100)
-            max_installs = st.number_input("📥 Maximum Installs", min_value=min_installs, value=max_installs, step=100)
-            content_rating = st.selectbox("🔞 Content Rating", ["All"] + content_ratings)
-            free_only = st.checkbox("🆓 Show Only Free Apps")
-            has_ads = st.checkbox("📢 Apps with Ads")
-            has_in_app_purchases = st.checkbox("💵 Apps with In-App Purchases")
-            editors_choice = st.checkbox("🏆 Editors' Choice")
-        elif tab == "App Release Trend":
-            category = st.selectbox("📂 Select Category", ["All"] + categories)
-        elif tab == "Average Rating per Category":
-            category = st.selectbox("📂 Select Category", ["All"] + categories)
 
     return {
         "category": None if category == "All" else category,
