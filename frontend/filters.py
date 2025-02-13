@@ -30,11 +30,7 @@ def get_filters(show_category=False, show_rating=False, show_price=False, show_i
     filters = {}
 
     if show_category:
-        if "category" not in st.session_state:
-            st.session_state.category = "All"
-        category = st.selectbox("📂 Select Category", ["All"] + categories, index=categories.index(
-            st.session_state.category) + 1 if st.session_state.category != "All" and st.session_state.category in categories else 0)
-        st.session_state.category = category
+        category = st.selectbox("📂 Select Category", ["All"] + categories)
         filters["category"] = None if category == "All" else category
 
     if show_rating:
