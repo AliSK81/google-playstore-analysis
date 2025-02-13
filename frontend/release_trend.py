@@ -18,7 +18,7 @@ release_trend = fetch_release_trend(category)
 if release_trend:
     years = [entry["year"] for entry in release_trend]
     counts = [entry["count"] for entry in release_trend]
-    fig, ax = plt.subplots(figsize=(8, 3))
+    fig, ax = plt.subplots(figsize=(5, 3))
     ax.plot(years, counts, marker="o", color="green")
     ax.set_xlabel("Year")
     ax.set_ylabel("Number of Apps Released")
