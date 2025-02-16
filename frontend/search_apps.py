@@ -30,16 +30,14 @@ filters["per_page"] = per_page
 
 response = fetch_apps(filters)
 
-if "apps" in response:
+if response["apps"]:
     apps = pd.DataFrame(response["apps"])
     total_apps = response["total_apps"]
     total_pages = response["total_pages"]
 
-    if not apps.empty:
-        st.dataframe(apps)
+    st.dataframe(apps)
 
-        st.write(f"Showing page {page} of {total_pages} (Total results: {total_apps})")
-
+    st.write(f"Showing page {page} of {total_pages} (Total results: {total_apps})")
 
 else:
     st.warning("No apps found with the current filters.")
