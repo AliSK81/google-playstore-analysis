@@ -7,6 +7,9 @@ def app():
     load_filters()
 
     pages = [
+        st.Page("categories_page.py", title="📂 Categories Management"),
+        st.Page("developers_page.py", title="👨‍💻 Developers Management"),
+        st.Page("apps_page.py", title="📱 Apps Management"),
         st.Page("search_apps.py", title="🔍 Search Apps"),
         st.Page("rating_distribution.py", title="📊 Rating Distribution"),
         st.Page("release_trend.py", title="📈 App Release Trend"),

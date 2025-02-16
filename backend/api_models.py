@@ -4,7 +4,7 @@ from typing import List, Optional
 from pydantic import field_serializer, BaseModel
 
 
-class FilterResponse(BaseModel):
+class FilterModel(BaseModel):
     categories: List[str]
     content_ratings: List[str]
     min_rating: float
@@ -15,7 +15,7 @@ class FilterResponse(BaseModel):
     max_installs: int
 
 
-class AppResponse(BaseModel):
+class AppModel(BaseModel):
     id: int
     app_id: str
     app_name: str
@@ -51,8 +51,25 @@ class AppResponse(BaseModel):
         return value.strftime('%Y-%m-%d %H:%M:%S') if value else None
 
 
-class PaginatedAppsResponse(BaseModel):
-    apps: List[AppResponse]
-    total_apps: int
-    total_pages: int
-    current_page: int
+class CategoryModel(BaseModel):
+    id: int
+    name: str
+
+    class Config:
+        from_attributes = True
+
+
+class UpsertCategoryModel(BaseModel):
+    name: str
+
+    class Config:
+        from_attributes = True
+
+
+class DeveloperModel(BaseModel):
+    id: int
+    name: str
+    email: str
+
+    class Config:
+        from_attributes = True

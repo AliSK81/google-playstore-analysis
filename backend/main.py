@@ -3,14 +3,14 @@ from typing import List, Optional
 from fastapi import Query, Depends, FastAPI
 from sqlalchemy import func
 
-from api_models import FilterResponse, AppResponse, PaginatedAppsResponse
+from api_models import FilterModel, AppModel, CategoryModel, DeveloperModel, UpsertCategoryModel
 from database import SessionLocal, get_db
-from db_models import Category, App
+from db_models import Category, App, Developer
 
 app = FastAPI()
 
 
-@app.get("/filters", response_model=FilterResponse)
+@app.get("/filters", response_model=FilterModel)
 def get_filters(db: SessionLocal = Depends(get_db)):
     categories = db.query(Category.name).all()
     categories = [category[0] for category in categories]
@@ -22,7 +22,7 @@ def get_filters(db: SessionLocal = Depends(get_db)):
     max_price = db.query(func.max(App.price)).scalar() or 100.0
     min_installs = db.query(func.min(App.installs)).scalar() or 0
     max_installs = db.query(func.max(App.installs)).scalar() or 10000000
-    return FilterResponse(
+    return FilterModel(
         categories=categories,
         content_ratings=content_ratings,
         min_rating=min_rating,
@@ -34,7 +34,7 @@ def get_filters(db: SessionLocal = Depends(get_db)):
     )
 
 
-@app.get("/apps", response_model=PaginatedAppsResponse)
+@app.get("/apps", response_model=dict)
 def get_filtered_apps(
         category: Optional[str] = Query(None),
         min_rating: Optional[float] = Query(None),
@@ -76,14 +76,14 @@ def get_filtered_apps(
     total_pages = (total_apps // per_page) + (1 if total_apps % per_page > 0 else 0)
 
     return {
-        "apps": apps,
+        "apps": [AppModel.from_orm(app) for app in apps],
         "total_apps": total_apps,
         "total_pages": total_pages,
         "current_page": page,
     }
 
 
-@app.get("/apps/rating_distribution", response_model=List[dict])
+@app.get("/statistics/rating_distribution", response_model=List[dict])
 def get_rating_distribution(
         category: Optional[str] = Query(None),
         min_rating: Optional[float] = Query(None),
@@ -124,7 +124,7 @@ def get_rating_distribution(
     return [{"rating": round(rating, 1), "count": count} for rating, count in result]
 
 
-@app.get("/apps/release_trend", response_model=List[dict])
+@app.get("/statistics/release_trend", response_model=List[dict])
 def get_app_release_trend(category_name: Optional[str] = None, db: SessionLocal = Depends(get_db)):
     query = db.query(func.extract('year', App.released).label('year'), func.count().label('count')) \
         .group_by(func.extract('year', App.released)) \
@@ -139,7 +139,7 @@ def get_app_release_trend(category_name: Optional[str] = None, db: SessionLocal 
     return [{"year": int(year), "count": count} for year, count in result]
 
 
-@app.get("/apps/update_trend", response_model=List[dict])
+@app.get("/statistics/update_trend", response_model=List[dict])
 def get_app_update_trend(category_name: Optional[str] = None, db: SessionLocal = Depends(get_db)):
     query = db.query(func.extract('year', App.last_updated).label('year'), func.count().label('count')) \
         .group_by(func.extract('year', App.last_updated)) \
@@ -154,7 +154,7 @@ def get_app_update_trend(category_name: Optional[str] = None, db: SessionLocal =
     return [{"year": int(year), "count": count} for year, count in result]
 
 
-@app.get("/apps/average_rating/", response_model=dict)
+@app.get("/statistics/average_rating/", response_model=dict)
 def get_average_rating(category_name: Optional[str] = None, db: SessionLocal = Depends(get_db)):
     query = db.query(func.avg(App.rating))
 
@@ -165,6 +165,176 @@ def get_average_rating(category_name: Optional[str] = None, db: SessionLocal = D
 
     avg_rating = query.scalar()
     return {"category": category_name or "All", "average_rating": avg_rating}
+
+
+@app.post("/categories", response_model=CategoryModel)
+def create_category(category: UpsertCategoryModel, db: SessionLocal = Depends(get_db)):
+    db_category = Category(name=category.name)
+    db.add(db_category)
+    db.commit()
+    db.refresh(db_category)
+    return CategoryModel.from_orm(db_category)
+
+
+@app.get("/categories", response_model=List[CategoryModel])
+def get_categories(db: SessionLocal = Depends(get_db)):
+    return [CategoryModel.from_orm(category) for category in db.query(Category).all()]
+
+
+@app.get("/categories/{category_id}", response_model=CategoryModel)
+def get_category(category_id: int, db: SessionLocal = Depends(get_db)):
+    return CategoryModel.from_orm(db.query(Category).filter(Category.id == category_id).first())
+
+
+@app.put("/categories/{category_id}", response_model=CategoryModel)
+def update_category(category_id: int, category: UpsertCategoryModel, db: SessionLocal = Depends(get_db)):
+    db_category = db.query(Category).filter(Category.id == category_id).first()
+    if db_category:
+        db_category.name = category.name
+        db.commit()
+        db.refresh(db_category)
+        return CategoryModel.from_orm(db_category)
+    return None
+
+
+@app.delete("/categories/{category_id}", response_model=CategoryModel)
+def delete_category(category_id: int, db: SessionLocal = Depends(get_db)):
+    db_category = db.query(Category).filter(Category.id == category_id).first()
+    if db_category:
+        db.delete(db_category)
+        db.commit()
+        return CategoryModel.from_orm(db_category)
+    return None
+
+
+@app.post("/developers", response_model=DeveloperModel)
+def create_developer(developer: DeveloperModel, db: SessionLocal = Depends(get_db)):
+    db_developer = Developer(name=developer.name, email=developer.email)
+    db.add(db_developer)
+    db.commit()
+    db.refresh(db_developer)
+    return DeveloperModel.from_orm(db_developer)
+
+
+@app.get("/developers", response_model=dict)
+def get_developers(
+        page: Optional[int] = Query(1, ge=1),
+        per_page: Optional[int] = Query(10, ge=1),
+        db: SessionLocal = Depends(get_db)
+):
+    total_developers = db.query(Developer).count()
+    total_pages = (total_developers // per_page) + (1 if total_developers % per_page > 0 else 0)
+
+    offset = (page - 1) * per_page
+    developers = db.query(Developer).offset(offset).limit(per_page).all()
+
+    return {
+        "developers": [DeveloperModel.from_orm(developer) for developer in developers],
+        "total_developers": total_developers,
+        "total_pages": total_pages,
+        "current_page": page,
+    }
+
+
+@app.get("/developers/{developer_id}", response_model=DeveloperModel)
+def get_developer(developer_id: int, db: SessionLocal = Depends(get_db)):
+    return DeveloperModel.from_orm(db.query(Developer).filter(Developer.id == developer_id).first())
+
+
+@app.put("/developers/{developer_id}", response_model=DeveloperModel)
+def update_developer(developer_id: int, developer: DeveloperModel, db: SessionLocal = Depends(get_db)):
+    db_developer = db.query(Developer).filter(Developer.id == developer_id).first()
+    if db_developer:
+        db_developer.name = developer.name
+        db_developer.email = developer.email
+        db.commit()
+        db.refresh(db_developer)
+        return DeveloperModel.from_orm(db_developer)
+    return None
+
+
+@app.delete("/developers/{developer_id}", response_model=DeveloperModel)
+def delete_developer(developer_id: int, db: SessionLocal = Depends(get_db)):
+    db_developer = db.query(Developer).filter(Developer.id == developer_id).first()
+    if db_developer:
+        db.delete(db_developer)
+        db.commit()
+        return DeveloperModel.from_orm(db_developer)
+    return None
+
+
+@app.post("/apps", response_model=AppModel)
+def create_app(app: AppModel, db: SessionLocal = Depends(get_db)):
+    db_app = App(
+        app_id=app.app_id,
+        app_name=app.app_name,
+        category_id=app.category_id,
+        developer_id=app.developer_id,
+        rating=app.rating,
+        rating_count=app.rating_count,
+        installs=app.installs,
+        min_installs=app.min_installs,
+        max_installs=app.max_installs,
+        free=app.free,
+        price=app.price,
+        currency=app.currency,
+        size=app.size,
+        min_android=app.min_android,
+        released=app.released,
+        last_updated=app.last_updated,
+        content_rating=app.content_rating,
+        ad_supported=app.ad_supported,
+        in_app_purchases=app.in_app_purchases,
+        editors_choice=app.editors_choice
+    )
+    db.add(db_app)
+    db.commit()
+    db.refresh(db_app)
+    return AppModel.from_orm(db_app)
+
+
+@app.get("/apps/{app_id}", response_model=AppModel)
+def get_app(app_id: int, db: SessionLocal = Depends(get_db)):
+    return AppModel.from_orm(db.query(App).filter(App.id == app_id).first())
+
+
+@app.put("/apps/{app_id}", response_model=AppModel)
+def update_app(app_id: int, app: AppModel, db: SessionLocal = Depends(get_db)):
+    db_app = db.query(App).filter(App.id == app_id).first()
+    if db_app:
+        db_app.app_name = app.app_name
+        db_app.category_id = app.category_id
+        db_app.developer_id = app.developer_id
+        db_app.rating = app.rating
+        db_app.rating_count = app.rating_count
+        db_app.installs = app.installs
+        db_app.min_installs = app.min_installs
+        db_app.max_installs = app.max_installs
+        db_app.free = app.free
+        db_app.price = app.price
+        db_app.currency = app.currency
+        db_app.size = app.size
+        db_app.min_android = app.min_android
+        db_app.released = app.released
+        db_app.last_updated = app.last_updated
+        db_app.content_rating = app.content_rating
+        db_app.ad_supported = app.ad_supported
+        db_app.in_app_purchases = app.in_app_purchases
+        db_app.editors_choice = app.editors_choice
+        db.commit()
+        db.refresh(db_app)
+        return AppModel.from_orm(db_app)
+    return None
+
+
+@app.delete("/apps/{app_id}", response_model=AppModel)
+def delete_app(app_id: int, db: SessionLocal = Depends(get_db)):
+    db_app = db.query(App).filter(App.id == app_id).first()
+    if db_app:
+        db.delete(db_app)
+        db.commit()
+        return AppModel.from_orm(db_app)
+    return None
 
 
 def get_category_id(db: SessionLocal, category_name: str) -> Optional[int]:
