@@ -49,3 +49,10 @@ class AppResponse(BaseModel):
     @field_serializer("scraped_time")
     def serialize_datetime(self, value: Optional[datetime]) -> Optional[str]:
         return value.strftime('%Y-%m-%d %H:%M:%S') if value else None
+
+
+class PaginatedAppsResponse(BaseModel):
+    apps: List[AppResponse]
+    total_apps: int
+    total_pages: int
+    current_page: int

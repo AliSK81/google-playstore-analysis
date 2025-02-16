@@ -1,3 +1,4 @@
+import pandas as pd
 import streamlit as st
 
 from data_fetcher import fetch_apps
@@ -15,12 +16,30 @@ with st.sidebar:
         show_free_only=True,
         show_ads=True,
         show_in_app=True,
-        show_editors_choice=True,
-        show_limits=True
+        show_editors_choice=True
     )
 
-filtered_df = fetch_apps(filters)
-if not filtered_df.empty:
-    st.dataframe(filtered_df)
+col1, col2 = st.columns(2)
+with col1:
+    page = st.number_input("Page", min_value=1, step=1, value=1)
+with col2:
+    per_page = st.number_input("Results per Page", min_value=1, max_value=100, value=10)
+
+filters["page"] = page
+filters["per_page"] = per_page
+
+response = fetch_apps(filters)
+
+if "apps" in response:
+    apps = pd.DataFrame(response["apps"])
+    total_apps = response["total_apps"]
+    total_pages = response["total_pages"]
+
+    if not apps.empty:
+        st.dataframe(apps)
+
+        st.write(f"Showing page {page} of {total_pages} (Total results: {total_apps})")
+
+
 else:
     st.warning("No apps found with the current filters.")

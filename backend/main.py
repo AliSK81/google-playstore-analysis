@@ -3,7 +3,7 @@ from typing import List, Optional
 from fastapi import Query, Depends, FastAPI
 from sqlalchemy import func
 
-from api_models import FilterResponse, AppResponse
+from api_models import FilterResponse, AppResponse, PaginatedAppsResponse
 from database import SessionLocal, get_db
 from db_models import Category, App
 
@@ -34,7 +34,7 @@ def get_filters(db: SessionLocal = Depends(get_db)):
     )
 
 
-@app.get("/apps", response_model=List[AppResponse])
+@app.get("/apps", response_model=PaginatedAppsResponse)
 def get_filtered_apps(
         category: Optional[str] = Query(None),
         min_rating: Optional[float] = Query(None),
@@ -48,7 +48,8 @@ def get_filtered_apps(
         ad_supported: Optional[bool] = Query(None),
         in_app_purchases: Optional[bool] = Query(None),
         editors_choice: Optional[bool] = Query(None),
-        limit: Optional[int] = Query(100, ge=1),
+        page: Optional[int] = Query(1, ge=1),
+        per_page: Optional[int] = Query(100, ge=1),
         db: SessionLocal = Depends(get_db)
 ):
     filters = {
@@ -69,8 +70,17 @@ def get_filtered_apps(
     query = db.query(App)
     query = apply_filters_to_query(query, filters, db)
 
-    apps = query.limit(limit).all()
-    return apps
+    offset = (page - 1) * per_page
+    apps = query.offset(offset).limit(per_page).all()
+    total_apps = query.count()
+    total_pages = (total_apps // per_page) + (1 if total_apps % per_page > 0 else 0)
+
+    return {
+        "apps": apps,
+        "total_apps": total_apps,
+        "total_pages": total_pages,
+        "current_page": page,
+    }
 
 
 @app.get("/apps/rating_distribution", response_model=List[dict])

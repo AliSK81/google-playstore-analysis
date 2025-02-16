@@ -23,7 +23,7 @@ def get_filter_default_values():
 
 def get_filters(show_category=False, show_rating=False, show_price=False, show_installs=False,
                 show_content_rating=False,
-                show_free_only=False, show_ads=False, show_in_app=False, show_editors_choice=False, show_limits=False):
+                show_free_only=False, show_ads=False, show_in_app=False, show_editors_choice=False):
     categories, content_ratings, min_rating, max_rating, min_price, max_price, min_installs, max_installs \
         = get_filter_default_values()
 
@@ -76,10 +76,5 @@ def get_filters(show_category=False, show_rating=False, show_price=False, show_i
 
     if show_editors_choice:
         filters["editors_choice"] = st.checkbox("🏆 Editors' Choice")
-
-    if show_limits:
-        limit_size = 1000
-        limit_input = st.number_input("📝 Results Limit", min_value=1, max_value=3000000, value=limit_size, step=100)
-        filters["limit"] = None if limit_input == limit_size else limit_input
 
     return filters

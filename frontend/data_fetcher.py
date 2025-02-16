@@ -1,4 +1,3 @@
-import pandas as pd
 import requests
 
 api_url = "http://127.0.0.1:8000"
@@ -20,7 +19,7 @@ def fetch_filters():
 
 def fetch_apps(filters):
     data = fetch_data("apps", filters)
-    return pd.DataFrame(data) if data else pd.DataFrame()
+    return data
 
 
 def fetch_rating_distribution(filters):
