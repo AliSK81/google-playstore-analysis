@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import streamlit as st
 
-from data_fetcher import fetch_update_trend
+from client_api import fetch_update_trend
 from filters import get_filters
 
 st.subheader("App Update Trend")

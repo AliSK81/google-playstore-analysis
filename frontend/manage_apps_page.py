@@ -3,7 +3,7 @@ import time
 import pandas as pd
 import streamlit as st
 
-from data_fetcher import fetch_apps, create_app, update_app, delete_app
+from client_api import fetch_apps, create_app, update_app, delete_app
 
 
 def create_app_page():

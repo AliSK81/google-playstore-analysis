@@ -1,7 +1,7 @@
 import pandas as pd
 import streamlit as st
 
-from data_fetcher import fetch_apps
+from client_api import fetch_apps
 from filters import get_filters
 
 st.subheader("Search Apps")

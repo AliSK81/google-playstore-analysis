@@ -3,7 +3,7 @@ import time
 import pandas as pd
 import streamlit as st
 
-from data_fetcher import fetch_developers, create_developer, update_developer, delete_developer
+from client_api import fetch_developers, create_developer, update_developer, delete_developer
 
 
 def create_developer_page():

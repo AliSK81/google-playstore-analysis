@@ -3,7 +3,7 @@ import time
 import pandas as pd
 import streamlit as st
 
-from data_fetcher import fetch_categories, create_category, update_category, delete_category
+from client_api import fetch_categories, create_category, update_category, delete_category
 
 
 def create_category_page():

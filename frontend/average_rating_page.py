@@ -1,6 +1,6 @@
 import streamlit as st
 
-from data_fetcher import fetch_average_rating
+from client_api import fetch_average_rating
 from filters import get_filters
 
 st.subheader("Average Rating per Category")

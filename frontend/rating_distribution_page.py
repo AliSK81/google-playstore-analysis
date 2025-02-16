@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import streamlit as st
 
-from data_fetcher import fetch_rating_distribution
+from client_api import fetch_rating_distribution
 from filters import get_filters
 
 st.subheader("Rating Distribution")

@@ -1,6 +1,6 @@
 import streamlit as st
 
-from data_fetcher import fetch_filters
+from client_api import fetch_filters
 
 
 def load_filters():
