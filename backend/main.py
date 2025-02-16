@@ -3,9 +3,9 @@ from typing import List, Optional
 from fastapi import Query, Depends, FastAPI
 from sqlalchemy import func
 
-from api_models import FilterModel, AppModel, CategoryModel, DeveloperModel, UpsertCategoryModel
+from models import FilterModel, AppModel, CategoryModel, DeveloperModel, UpsertCategoryModel
 from database import SessionLocal, get_db
-from db_models import Category, App, Developer
+from entities import Category, App, Developer
 
 app = FastAPI()
 
