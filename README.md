@@ -18,25 +18,30 @@ installation patterns. Key components include:
 ```
 google-playstore-analysis/
 │── backend/                # FastAPI backend
-│   ├── api_models.py       # API data models
+│   ├── venv/               # Virtual environment for backend dependencies
 │   ├── database.py         # Database connection setup
-│   ├── db_models.py        # SQLAlchemy models
+│   ├── entities.py         # SQLAlchemy models for database tables
 │   ├── main.py             # FastAPI app entry point
+│   ├── models.py           # API data models (Pydantic)
 │   └── requirements.txt    # Backend dependencies
 │
 │── frontend/               # Streamlit dashboard
+│   ├── venv/               # Virtual environment for frontend dependencies
 │   ├── app.py              # Main app UI
-│   ├── average_rating.py   # Rating analysis component
-│   ├── data_fetcher.py     # Data fetching logic
+│   ├── average_rating_page.py   # Rating analysis component
+│   ├── client_api.py       # Data fetching logic (API calls)
 │   ├── filters.py          # Filters for app data
-│   ├── rating_distribution.py # Rating distribution chart
-│   ├── release_trend.py    # Release trends chart
+│   ├── manage_apps_page.py # Manage apps (create, update, delete)
+│   ├── manage_categories_page.py # Manage categories (create, update, delete)
+│   ├── manage_developers_page.py # Manage developers (create, update, delete)
+│   ├── rating_distribution_page.py # Rating distribution chart
+│   ├── release_trend_page.py    # Release trends chart
 │   ├── requirements.txt    # Frontend dependencies
-│   ├── search_apps.py      # Search apps functionality
-│   └── update_trend.py     # Update trend chart
+│   ├── search_apps_page.py # Search apps functionality
+│   └── update_trend_page.py     # Update trend chart
 │
 │── notebooks/              # Jupyter Notebooks for analysis
-│   └── data_cleaning.ipynb # Data preprocessing
+│   └── data_cleaning.ipynb # Data preprocessing and cleaning notebook
 │
 │── sql/                    # SQL scripts
 │   ├── indexes.sql         # Index optimization scripts
@@ -54,6 +59,7 @@ google-playstore-analysis/
 │   └── Google-Playstore.csv  # Raw dataset
 │
 ├── .env                    # Environment variables for database connection
+├── .gitignore              # Git ignore file
 └── README.md               # Setup and usage guide
 ```
 
