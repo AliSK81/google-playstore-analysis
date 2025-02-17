@@ -1,5 +1,7 @@
 # Google Play Store Data Analysis
 
+**[Watch the Demo](https://drive.google.com/file/d/1r8GfgGVyj56qIhsO5HK8IE80V5kjlx4d/view?usp=sharing)**  
+
 ## Project Overview
 
 This project focuses on analyzing **Google Play Store** app data to derive insights on market trends, app ratings, and
@@ -48,7 +50,6 @@ google-playstore-analysis/
 │   └── schema.sql          # Database schema creation
 │
 │── docs/                   # Documentation files
-│   ├── demo_video.mp4      # Project demo video
 │   ├── report.docx         # Final project report
 │   └── report.pdf          # PDF version of the report
 │
