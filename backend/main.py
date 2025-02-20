@@ -1,9 +1,11 @@
+from datetime import datetime
 from typing import List, Optional
 
 from fastapi import Query, Depends, FastAPI
 from sqlalchemy import func
 
-from models import FilterModel, AppModel, CategoryModel, DeveloperModel, UpsertCategoryModel
+from models import FilterModel, AppModel, CategoryModel, DeveloperModel, UpsertCategoryModel, UpsertDeveloperModel, \
+    UpsertAppModel
 from database import SessionLocal, get_db
 from entities import Category, App, Developer
 
@@ -208,7 +210,7 @@ def delete_category(category_id: int, db: SessionLocal = Depends(get_db)):
 
 
 @app.post("/developers", response_model=DeveloperModel)
-def create_developer(developer: DeveloperModel, db: SessionLocal = Depends(get_db)):
+def create_developer(developer: UpsertDeveloperModel, db: SessionLocal = Depends(get_db)):
     db_developer = Developer(name=developer.name, email=developer.email)
     db.add(db_developer)
     db.commit()
@@ -242,7 +244,7 @@ def get_developer(developer_id: int, db: SessionLocal = Depends(get_db)):
 
 
 @app.put("/developers/{developer_id}", response_model=DeveloperModel)
-def update_developer(developer_id: int, developer: DeveloperModel, db: SessionLocal = Depends(get_db)):
+def update_developer(developer_id: int, developer: UpsertDeveloperModel, db: SessionLocal = Depends(get_db)):
     db_developer = db.query(Developer).filter(Developer.id == developer_id).first()
     if db_developer:
         db_developer.name = developer.name
@@ -264,28 +266,28 @@ def delete_developer(developer_id: int, db: SessionLocal = Depends(get_db)):
 
 
 @app.post("/apps", response_model=AppModel)
-def create_app(app: AppModel, db: SessionLocal = Depends(get_db)):
+def create_app(app: UpsertAppModel, db: SessionLocal = Depends(get_db)):
     db_app = App(
         app_id=app.app_id,
         app_name=app.app_name,
-        category_id=app.category_id,
-        developer_id=app.developer_id,
-        rating=app.rating,
-        rating_count=app.rating_count,
-        installs=app.installs,
-        min_installs=app.min_installs,
-        max_installs=app.max_installs,
-        free=app.free,
-        price=app.price,
-        currency=app.currency,
-        size=app.size,
-        min_android=app.min_android,
-        released=app.released,
-        last_updated=app.last_updated,
-        content_rating=app.content_rating,
-        ad_supported=app.ad_supported,
-        in_app_purchases=app.in_app_purchases,
-        editors_choice=app.editors_choice
+        category_id=app.category_id or 0,
+        developer_id=app.developer_id or 0,
+        rating=app.rating or 0.0,
+        rating_count=0,
+        installs=0,
+        min_installs=0,
+        max_installs=0,
+        free=True,
+        price=0.0,
+        currency='',
+        size=0.0,
+        min_android='',
+        released=datetime.now(),
+        last_updated=datetime.now(),
+        content_rating='Unrated',
+        ad_supported=False,
+        in_app_purchases=False,
+        editors_choice=False
     )
     db.add(db_app)
     db.commit()
@@ -299,7 +301,7 @@ def get_app(app_id: int, db: SessionLocal = Depends(get_db)):
 
 
 @app.put("/apps/{app_id}", response_model=AppModel)
-def update_app(app_id: int, app: AppModel, db: SessionLocal = Depends(get_db)):
+def update_app(app_id: int, app: UpsertAppModel, db: SessionLocal = Depends(get_db)):
     db_app = db.query(App).filter(App.id == app_id).first()
     if db_app:
         db_app.app_name = app.app_name

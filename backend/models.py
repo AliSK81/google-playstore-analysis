@@ -51,6 +51,17 @@ class AppModel(BaseModel):
         return value.strftime('%Y-%m-%d %H:%M:%S') if value else None
 
 
+class UpsertAppModel(BaseModel):
+    app_id: str
+    app_name: str
+    category_id: Optional[int]
+    developer_id: Optional[int]
+    rating: Optional[float]
+
+    class Config:
+        from_attributes = True
+
+
 class CategoryModel(BaseModel):
     id: int
     name: str
@@ -68,6 +79,14 @@ class UpsertCategoryModel(BaseModel):
 
 class DeveloperModel(BaseModel):
     id: int
+    name: str
+    email: str
+
+    class Config:
+        from_attributes = True
+
+
+class UpsertDeveloperModel(BaseModel):
     name: str
     email: str
 
